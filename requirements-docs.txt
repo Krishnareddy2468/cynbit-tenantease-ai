@@ -1,0 +1,4 @@
+# Optional - only needed to regenerate the PDF reports from Markdown.
+#   pip install -r requirements-docs.txt && python scripts/build_docs.py
+markdown==3.7
+weasyprint==63.1

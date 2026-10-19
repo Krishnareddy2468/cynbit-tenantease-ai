@@ -352,7 +352,7 @@ zero tests; this is cheap differentiation.
 
 ---
 
-### ⬜ Phase 8 — Deliverable 1: AI Opportunity Report
+### ✅ Phase 8 — Deliverable 1: AI Opportunity Report
 
 | | |
 |---|---|
@@ -471,7 +471,7 @@ the reports; two of the three graded deliverables *are* documents.
 
 ## 6. Current state
 
-**7 of 10 phases complete** (0–7). The three ML layers and the dashboard are built and verified.
+**8 of 10 phases complete** (0–8). The three ML layers and the dashboard are built and verified.
 
 ```
 daa12d8  feat(app): four-tab Streamlit intelligence dashboard        ← Phase 6
@@ -484,7 +484,7 @@ fff5fd9  feat(data): synthetic tenant roster and payment ledger generator  ← P
 31a2ae4  chore: initialize TenantEase AI Intelligence Engine project ← Phase 0
 ```
 
-Pushed to GitHub. **Next: Phase 8 — AI Opportunity Report.**
+Pushed to GitHub. **Next: Phase 9 — Technical Approach Report.**
 
 Verified so far: data generator (collection 94.5%), risk model (test AUC 0.893,
 CV 0.866, oracle ceiling 0.918), Prophet forecast (MAPE 1.36%) with Holt-Winters
