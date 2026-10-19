@@ -19,9 +19,133 @@ from src import config, data_generator, features, forecasting, recommendations, 
 
 st.set_page_config(
     page_title="TenantEase AI Intelligence Engine",
-    page_icon="🏠",
+    page_icon=":material/apartment:",
     layout="wide",
 )
+
+
+# Chrome tokens per theme. `set_theme()` in src/ui.py handles the chart palette;
+# these drive the Streamlit surfaces (page, sidebar, cards, text).
+_UI_TOKENS = {
+    "dark": {
+        "bg": "#141414", "surface": "#1c1c1b", "border": "#2c2c2a",
+        "ink": "#ECECEA", "muted": "#9a9a97", "accent": "#5B8DEF",
+        "label": "#8a8a87", "value": "#F2F2F0", "link": "#7FA8F5",
+    },
+    "light": {
+        "bg": "#F6F8FA", "surface": "#FFFFFF", "border": "#E2E5EA",
+        "ink": "#1A1D23", "muted": "#687280", "accent": "#3A6FD0",
+        "label": "#687280", "value": "#111827", "link": "#2C5FC4",
+    },
+}
+
+
+def _inject_css(mode: str) -> None:
+    """Design layer, themed: typography, card metrics, muted chrome, polished tabs."""
+    t = _UI_TOKENS.get(mode, _UI_TOKENS["dark"])
+    st.markdown(
+        f"""
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        html, body, [class*="css"], .stMarkdown, .stMetric, button, input, textarea, select {{
+            font-family: 'Inter', -apple-system, system-ui, sans-serif !important;
+        }}
+
+        /* Base surfaces */
+        .stApp, [data-testid="stAppViewContainer"] {{ background: {t['bg']}; }}
+        [data-testid="stHeader"] {{ background: transparent; }}
+        [data-testid="stSidebar"] {{ background: {t['surface']}; border-right: 1px solid {t['border']}; }}
+        .stApp, .stMarkdown, p, span, label, li {{ color: {t['ink']}; }}
+
+        /* Remove stock chrome */
+        #MainMenu, footer, [data-testid="stDecoration"] {{ display: none !important; }}
+        [data-testid="stToolbar"] {{ right: 1rem; }}
+
+        /* Tighten the main canvas */
+        .block-container {{ padding-top: 2.2rem; padding-bottom: 3rem; max-width: 1400px; }}
+
+        /* Metrics as cards */
+        [data-testid="stMetric"] {{
+            background: {t['surface']};
+            border: 1px solid {t['border']};
+            border-radius: 12px;
+            padding: 14px 16px;
+        }}
+        [data-testid="stMetricLabel"] p {{
+            font-size: 0.72rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: {t['label']} !important;
+        }}
+        [data-testid="stMetricValue"] {{
+            font-size: 1.7rem !important;
+            font-weight: 700 !important;
+            color: {t['value']} !important;
+        }}
+        [data-testid="stMetricDelta"] {{ font-size: 0.8rem !important; }}
+
+        /* Tabs: roomier, accent underline on the active tab */
+        [data-testid="stTabs"] [data-baseweb="tab-list"] {{ gap: 6px; border-bottom: 1px solid {t['border']}; }}
+        [data-testid="stTabs"] [data-baseweb="tab"] {{
+            height: 44px; padding: 0 18px; font-weight: 600; font-size: 0.92rem; color: {t['muted']};
+        }}
+        [data-testid="stTabs"] [aria-selected="true"] {{ color: {t['accent']} !important; }}
+
+        /* Section subheaders + links */
+        h1, h2, h3 {{ color: {t['ink']}; letter-spacing: -0.01em; }}
+        a {{ color: {t['link']} !important; }}
+
+        /* Input widgets follow the theme (multiselect, selectbox) */
+        [data-baseweb="select"] > div {{
+            background: {t['surface']} !important;
+            border-color: {t['border']} !important;
+        }}
+        [data-testid="stExpander"] {{
+            background: {t['surface']};
+            border: 1px solid {t['border']};
+            border-radius: 10px;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _header(mode: str) -> None:
+    """A branded header band instead of the default st.title."""
+    t = _UI_TOKENS.get(mode, _UI_TOKENS["dark"])
+    st.markdown(
+        f"""
+        <div style="padding: 6px 0 2px 0;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:38px;height:38px;border-radius:10px;
+                        background:linear-gradient(135deg,#5B8DEF,#2BB6A8);
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:15px;font-weight:700;color:#fff;">TE</div>
+            <div>
+              <div style="font-size:1.55rem;font-weight:700;color:{t['value']};
+                          line-height:1.1;">TenantEase AI Intelligence Engine</div>
+              <div style="font-size:0.9rem;color:{t['muted']};margin-top:2px;">
+                Predictive AI layer for Cynbit's TenantEase · risk scoring ·
+                revenue forecasting · smart recommendations
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="height:1px;background:{t['border']};margin:16px 0 20px 0;"></div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# Resolve the active theme once per run, before any CSS or chart is rendered.
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "dark"
+THEME_MODE = st.session_state.theme_mode
+ui.set_theme(THEME_MODE)
+_inject_css(THEME_MODE)
 
 
 # --------------------------------------------------------------------------
@@ -38,7 +162,12 @@ def load_model():
     try:
         return risk_model.TrainedRiskModel.load()
     except Exception:
-        return risk_model.train()
+        # First run (no artifact yet): train once and persist so later launches
+        # load instantly. This is what makes a single command "just work".
+        with st.spinner("Training the risk model (first run only)…"):
+            trained = risk_model.train()
+            trained.save()
+        return trained
 
 
 @st.cache_data(show_spinner=False)
@@ -73,8 +202,23 @@ model = load_model()
 enriched = scored_tenants()
 
 with st.sidebar:
-    st.title("🏠 TenantEase AI")
-    st.caption("Predictive intelligence layer for Cynbit's TenantEase")
+    _title_color = _UI_TOKENS[THEME_MODE]["value"]
+    _sub_color = _UI_TOKENS[THEME_MODE]["muted"]
+    st.markdown(
+        f"<div style='font-size:1.15rem;font-weight:700;color:{_title_color};'>"
+        "TenantEase AI</div>"
+        f"<div style='font-size:0.8rem;color:{_sub_color};margin:2px 0 4px;'>"
+        "for Cynbit Technologies</div>",
+        unsafe_allow_html=True,
+    )
+    st.divider()
+    st.radio(
+        "Appearance",
+        options=["dark", "light"],
+        format_func=lambda m: "Dark" if m == "dark" else "Light",
+        key="theme_mode",
+        horizontal=True,
+    )
     st.divider()
     st.metric("Tenants scored", len(enriched))
     st.metric("Buildings", portfolio.tenants["building"].nunique())
@@ -84,18 +228,13 @@ with st.sidebar:
         "**Synthetic data.** Cynbit's production data is not public, so this "
         "demo runs on a generated portfolio with realistic Indian rental "
         "patterns (520 tenants, 24 months).",
-        icon="ℹ️",
     )
 
 
-st.title("TenantEase AI Intelligence Engine")
-st.caption(
-    "Three ML layers on top of TenantEase: default-risk scoring (XGBoost), "
-    "revenue forecasting (Prophet), and smart recommendations (LLM)."
-)
+_header(THEME_MODE)
 
 tab_risk, tab_forecast, tab_reco, tab_model = st.tabs(
-    ["🎯 Tenant Risk", "📈 Revenue Forecast", "💡 AI Recommendations", "🔬 Model Performance"]
+    ["Tenant Risk", "Revenue Forecast", "AI Recommendations", "Model Performance"]
 )
 
 
@@ -122,21 +261,7 @@ with tab_risk:
     )
     view = enriched[enriched["risk_category"].isin(bands)] if bands else enriched
     view = view.sort_values("risk_score", ascending=False)
-
-    table_cols = {
-        "tenant_name": "Tenant", "building": "Building", "unit_no": "Unit",
-        "property_type": "Type", "monthly_rent": "Rent", "risk_score": "Risk",
-        "risk_category": "Band", "on_time_rate": "On-time", "late_count_6m": "Late (6m)",
-    }
-    display = view[list(table_cols)].rename(columns=table_cols)
-    st.dataframe(
-        display, use_container_width=True, hide_index=True,
-        column_config={
-            "Rent": st.column_config.NumberColumn(format="₹%d"),
-            "Risk": st.column_config.ProgressColumn(min_value=0, max_value=100, format="%d"),
-            "On-time": st.column_config.NumberColumn(format="%.0f%%", help="Share of on-time payments"),
-        },
-    )
+    st.markdown(ui.risk_register_html(view), unsafe_allow_html=True)
 
     st.subheader("Tenant drill-down")
     names = view["tenant_name"].tolist()
@@ -179,13 +304,15 @@ with tab_forecast:
     st.subheader("3-month projection")
     proj = result.forecast.copy()
     proj["month"] = proj["month"].dt.strftime("%b %Y")
+    proj[["yhat", "yhat_lower", "yhat_upper"]] = proj[
+        ["yhat", "yhat_lower", "yhat_upper"]
+    ].round().astype(int)
     proj = proj.rename(columns={
         "month": "Month", "yhat": "Forecast", "yhat_lower": "Low (80%)", "yhat_upper": "High (80%)"
     })
-    st.dataframe(
-        proj, use_container_width=True, hide_index=True,
-        column_config={c: st.column_config.NumberColumn(format="₹%d")
-                       for c in ["Forecast", "Low (80%)", "High (80%)"]},
+    st.markdown(
+        ui.plain_table_html(proj, money_cols=("Forecast", "Low (80%)", "High (80%)")),
+        unsafe_allow_html=True,
     )
 
     st.plotly_chart(ui.decomposition(result.components), use_container_width=True)
@@ -202,23 +329,42 @@ with tab_forecast:
 
 with tab_reco:
     engine = rec_engine()
-    live = engine.client.is_live
-    badge = "🟢 Live LLM" if live else "⚪ Rule-based fallback"
-    st.markdown(f"**Recommendation source:** {badge} — `{engine.source_label}`")
-    if not live:
-        st.caption(
-            "No API key detected. Recommendations are generated by the "
-            "deterministic rule-based engine. Set ANTHROPIC_API_KEY or "
-            "OPENAI_API_KEY to enable live LLM generation."
-        )
-
     top_n = st.slider("How many top-risk tenants to advise", 3, 15, 5)
     cohort = enriched.sort_values("risk_score", ascending=False).head(top_n)
 
+    # Generate first, so the badge can reflect the *actual* source.
+    recommendations_out = [(row, engine.for_tenant(row.to_dict())) for _, row in cohort.iterrows()]
+    live_sources = {"anthropic", "openai", "gemini"}
+    used_live = any(rec.source in live_sources for _, rec in recommendations_out)
+    configured = engine.client.provider
+
+    if used_live:
+        dot_color, badge_text = "#2BB673", f"Live LLM — {engine.source_label}"
+        caption = None
+    elif engine.client.is_live:
+        # A provider is configured but every call fell back (e.g. a transient
+        # outage); be honest rather than claiming a live result.
+        dot_color = "#E8B339"
+        badge_text = f"{configured} unavailable — showing rule-based fallback"
+        caption = "The configured LLM could not be reached; recommendations use the deterministic engine."
+    else:
+        dot_color, badge_text = ui.INK_MUTED, "Rule-based fallback"
+        caption = (
+            "No API key detected. Set GEMINI_API_KEY (or ANTHROPIC_API_KEY / "
+            "OPENAI_API_KEY) in your .env to enable live LLM generation."
+        )
+
+    st.markdown(
+        f"<span style='display:inline-block;width:9px;height:9px;border-radius:50%;"
+        f"background:{dot_color};margin-right:7px;vertical-align:middle;'></span>"
+        f"<b>Recommendation source:</b> {badge_text}",
+        unsafe_allow_html=True,
+    )
+    if caption:
+        st.caption(caption)
+
     urgency_color = config.RISK_COLORS
-    for _, row in cohort.iterrows():
-        ctx = row.to_dict()
-        rec = engine.for_tenant(ctx)
+    for row, rec in recommendations_out:
         color = urgency_color.get(rec.urgency, ui.INK_MUTED)
         with st.container(border=True):
             head, score = st.columns([4, 1])

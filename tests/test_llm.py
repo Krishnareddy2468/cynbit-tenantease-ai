@@ -14,6 +14,8 @@ def _no_api_keys(monkeypatch):
     """Guarantee the no-key path for every test in this module."""
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
     monkeypatch.setattr("src.config.LLM_PROVIDER", "auto")
 
 

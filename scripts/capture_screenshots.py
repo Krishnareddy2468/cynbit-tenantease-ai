@@ -15,10 +15,10 @@ ROOT = Path(__file__).resolve().parent.parent
 SHOTS = ROOT / "screenshots"
 
 TABS = [
-    ("🎯 Tenant Risk", "01_tenant_risk.png"),
-    ("📈 Revenue Forecast", "02_revenue_forecast.png"),
-    ("💡 AI Recommendations", "03_recommendations.png"),
-    ("🔬 Model Performance", "04_model_performance.png"),
+    ("Tenant Risk", "01_tenant_risk.png"),
+    ("Revenue Forecast", "02_revenue_forecast.png"),
+    ("AI Recommendations", "03_recommendations.png"),
+    ("Model Performance", "04_model_performance.png"),
 ]
 
 

@@ -1,0 +1,17 @@
+# Cohesive dark theme — the app chrome matches the Plotly chart surface so
+# charts read as embedded panels, not pasted-in dark boxes on a light page.
+
+[theme]
+base = "dark"
+primaryColor = "#5B8DEF"
+backgroundColor = "#141414"
+secondaryBackgroundColor = "#1c1c1b"
+textColor = "#ECECEA"
+font = "sans serif"
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = true
+
+[server]
+runOnSave = true

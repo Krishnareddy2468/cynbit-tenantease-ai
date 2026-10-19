@@ -9,6 +9,15 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+# Load a local .env (if present) so API keys and provider settings are picked up
+# automatically - the app and every script just work, no manual export needed.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except Exception:
+    pass
+
 # --- Paths -----------------------------------------------------------------
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -116,6 +125,7 @@ LLM_MODEL = os.getenv("TENANTEASE_LLM_MODEL", "").strip()
 
 DEFAULT_ANTHROPIC_MODEL = "claude-haiku-5-5"
 DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
+DEFAULT_GEMINI_MODEL = "gemini-flash-lite-latest"
 
 LLM_MAX_TOKENS = 700
 LLM_TEMPERATURE = 0.3

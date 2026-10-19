@@ -17,11 +17,11 @@ TenantEase tells landlords **what happened** — it tracks rent, records payment
 and fires calendar-based reminders. It cannot tell them **what will happen**.
 This project adds three ML layers that make it predictive:
 
-| Layer | Question answered | Technique | Result |
-|---|---|---|---|
-| 🎯 **Risk scoring** | *Who* is likely to default next quarter? | XGBoost classification | Test AUC **0.893** |
-| 📈 **Revenue forecasting** | *What* will collection look like? | Prophet time series | Backtest MAPE **1.36%** |
-| 💡 **Recommendations** | *What should the landlord do?* | LLM + rule-based fallback | Plain-English action per tenant |
+| Layer                            | Question answered                          | Technique                 | Result                          |
+| -------------------------------- | ------------------------------------------ | ------------------------- | ------------------------------- |
+| 🎯 **Risk scoring**        | *Who* is likely to default next quarter? | XGBoost classification    | Test AUC **0.893**        |
+| 📈 **Revenue forecasting** | *What* will collection look like?        | Prophet time series       | Backtest MAPE **1.36%**   |
+| 💡 **Recommendations**     | *What should the landlord do?*           | LLM + rule-based fallback | Plain-English action per tenant |
 
 Together they move TenantEase into whitespace no Indian competitor (RentOk,
 ApnaComplex, Aeria) currently occupies: **prediction, not just tracking**.
@@ -32,12 +32,12 @@ ApnaComplex, Aeria) currently occupies: **prediction, not just tracking**.
 
 A four-tab Streamlit app ties the layers together.
 
-| Tab | What it shows |
-|---|---|
-| 🎯 Tenant Risk | Score distribution, risk bands, filterable register, per-tenant drill-down |
-| 📈 Revenue Forecast | 3-month forecast with confidence bands, trend/seasonal decomposition, MAPE |
-| 💡 AI Recommendations | LLM (or rule-based) action cards per tenant, live/fallback provider badge |
-| 🔬 Model Performance | ROC curve, confusion matrix, feature importance, baseline & oracle comparison |
+| Tab                   | What it shows                                                                 |
+| --------------------- | ----------------------------------------------------------------------------- |
+| 🎯 Tenant Risk        | Score distribution, risk bands, filterable register, per-tenant drill-down    |
+| 📈 Revenue Forecast   | 3-month forecast with confidence bands, trend/seasonal decomposition, MAPE    |
+| 💡 AI Recommendations | LLM (or rule-based) action cards per tenant, live/fallback provider badge     |
+| 🔬 Model Performance  | ROC curve, confusion matrix, feature importance, baseline & oracle comparison |
 
 ![Tenant Risk tab](screenshots/01_tenant_risk.png)
 ![Revenue Forecast tab](screenshots/02_revenue_forecast.png)
@@ -69,21 +69,22 @@ deterministic rule-based generator. To enable live LLM recommendations, copy
 
 ## Results
 
-| Metric | Value | Note |
-|---|---|---|
-| Risk model — test AUC | **0.893** | Held-out 20%, never seen in training |
-| Risk model — CV AUC | 0.866 ± 0.080 | 5-fold stratified |
-| Logistic baseline (test) | 0.864 | XGBoost lift +0.030 |
-| Oracle ceiling | 0.918 | Model sits **below** it → no label leakage |
-| Recall @ tuned threshold | 0.625 | Catches most real defaulters |
-| Revenue forecast — backtest MAPE | **1.36%** | 3-month held-out tail |
-| Test suite | **34 passing** | Incl. temporal-leakage guard + no-key fallback |
+| Metric                            | Value                | Note                                              |
+| --------------------------------- | -------------------- | ------------------------------------------------- |
+| Risk model — test AUC            | **0.893**      | Held-out 20%, never seen in training              |
+| Risk model — CV AUC              | 0.866 ± 0.080       | 5-fold stratified                                 |
+| Logistic baseline (test)          | 0.864                | XGBoost lift +0.030                               |
+| Oracle ceiling                    | 0.918                | Model sits **below** it → no label leakage |
+| Recall @ tuned threshold          | 0.625                | Catches most real defaulters                      |
+| Revenue forecast — backtest MAPE | **1.36%**      | 3-month held-out tail                             |
+| Test suite                        | **34 passing** | Incl. temporal-leakage guard + no-key fallback    |
 
 ---
 
 ## How it works
 
 ### Data
+
 Cynbit's production data is not public, so the PoC generates a **synthetic
 portfolio** (520 tenants, 7 buildings, 24 months, ~8,500 payment cycles) with the
 same schema TenantEase stores and realistic Indian rental behaviour — collection
@@ -92,6 +93,7 @@ payment delays), so the model learns from noisy proxies, as it would in
 production.
 
 ### No label leakage
+
 The payment ledger is split on the **time axis**: features come from the
 observation window (first 21 cycles), the label from the forward window (last 3).
 A tenant is a default only with **2+ delinquent cycles** in that window — a
@@ -99,7 +101,9 @@ pattern, not one unlucky month. The disjoint split is enforced by a test, and th
 model's AUC (0.893) sitting below the oracle ceiling (0.918) confirms no leakage.
 
 ### Graceful degradation
+
 Every layer has a fallback so the demo never breaks:
+
 - **Forecasting** → Holt-Winters if Prophet's backend is unavailable.
 - **Recommendations** → rule-based generator if no API key or malformed LLM output.
 
