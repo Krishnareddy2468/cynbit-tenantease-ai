@@ -1,3 +1,6 @@
 -r requirements.txt
 pytest==8.3.4
 ruff==0.8.4
+
+# Screenshot capture for the README (also run: playwright install chromium)
+playwright==1.49.0
