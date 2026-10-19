@@ -72,9 +72,20 @@ SEASONAL_PAYMENT_PRESSURE = {
 #: A payment is "late" once it crosses this many days past the due date.
 LATE_THRESHOLD_DAYS = 5
 
-#: Ground-truth default label: tenant is flagged as a default risk if they
-#: miss payment entirely or go this far past due in the labelling window.
+#: Days-past-due value stamped on a missed rent cycle in the ledger. A miss is
+#: treated as this delinquent for downstream aggregation.
 DEFAULT_DAYS_PAST_DUE = 30
+
+#: A single cycle counts as "delinquent" once it is missed outright or runs
+#: this many days past due.
+DELINQUENCY_DPD = 15
+
+#: Ground-truth default label: a tenant is flagged as a default risk only when
+#: they rack up this many delinquent cycles inside the label window. Default is
+#: a *pattern* of trouble, not one unlucky month - this matches how a landlord
+#: actually decides a tenant is a problem, and gives the model a cleaner signal
+#: than a single-cycle trigger (which is dominated by month-to-month noise).
+DEFAULT_MIN_BAD_CYCLES = 2
 
 #: Forward-looking window (months) the risk model predicts over.
 LABEL_HORIZON_MONTHS = 3

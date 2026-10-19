@@ -10,8 +10,10 @@ Every feature is computed strictly inside the observation window, so the
 model is asked the question it would face in production: *given what this
 tenant has done so far, will they default in the next quarter?*
 
-A tenant is labelled a default if, within the label window, they miss a rent
-cycle entirely or let one run `DEFAULT_DAYS_PAST_DUE` days past due.
+A tenant is labelled a default if, within the label window, they accumulate
+`DEFAULT_MIN_BAD_CYCLES` delinquent cycles (missed outright, or run
+`DELINQUENCY_DPD`+ days past due). Default is a repeated pattern, not a single
+unlucky month - a cleaner, more realistic target than a one-cycle trigger.
 """
 
 from __future__ import annotations
@@ -157,12 +159,16 @@ def build(
     table = behavioural.merge(tenants[profile_cols], on="tenant_id", how="inner")
 
     if with_label and labelled is not None:
+        # Count delinquent cycles (missed, or DELINQUENCY_DPD+ days past due)
+        # per tenant in the label window, then flag a default once the count
+        # reaches DEFAULT_MIN_BAD_CYCLES - a pattern of trouble, not one month.
         defaulted = (
             labelled.assign(
-                _bad=lambda d: (~d["paid"]) | (d["days_past_due"] >= config.DEFAULT_DAYS_PAST_DUE)
+                _bad=lambda d: (~d["paid"]) | (d["days_past_due"] >= config.DELINQUENCY_DPD)
             )
             .groupby("tenant_id")["_bad"]
-            .max()
+            .sum()
+            .ge(config.DEFAULT_MIN_BAD_CYCLES)
             .rename("will_default")
             .astype(int)
         )
