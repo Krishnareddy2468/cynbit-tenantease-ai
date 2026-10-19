@@ -102,7 +102,7 @@ RISK_COLORS = {
     "Low": "#2BB673",
     "Medium": "#E8B339",
     "High": "#E8743B",
-    "Critical": "#D94C4C",
+    "Critical": "#B5253A",
 }
 
 # --- Forecasting -----------------------------------------------------------
