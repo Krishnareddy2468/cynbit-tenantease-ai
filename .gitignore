@@ -21,3 +21,6 @@ models/*.joblib
 .ruff_cache/
 .DS_Store
 .ipynb_checkpoints/
+
+# Local working plan — not part of the published submission
+DEVELOPMENT_PLAN.md
