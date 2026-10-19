@@ -174,7 +174,7 @@ to learn; above 40% and the portfolio is not credible.
 
 ---
 
-### ⬜ Phase 3 — Layer 1: XGBoost risk classifier
+### ✅ Phase 3 — Layer 1: XGBoost risk classifier
 
 **Goal:** Score every tenant 0–100 on default risk, and prove the score is
 real with honest evaluation.
@@ -212,7 +212,7 @@ defensible beats suspiciously perfect.
 
 ---
 
-### ⬜ Phase 4 — Layer 2: Prophet revenue forecasting
+### ✅ Phase 4 — Layer 2: Prophet revenue forecasting
 
 **Goal:** Forecast 3 months of rental revenue with confidence bands.
 
@@ -249,7 +249,7 @@ f = forecasting.forecast(p.monthly_revenue); print(f.tail(3)); print(forecasting
 
 ---
 
-### ⬜ Phase 5 — Layer 3: LLM recommendation engine
+### ✅ Phase 5 — Layer 3: LLM recommendation engine
 
 **Goal:** Turn scores and forecasts into plain-English actions a non-technical
 landlord can execute.
@@ -287,7 +287,7 @@ print(r.for_tenant({'tenant_name':'Test','risk_score':82,'late_count_6m':3}))"
 
 ---
 
-### ⬜ Phase 6 — Streamlit dashboard
+### ✅ Phase 6 — Streamlit dashboard
 
 **Goal:** The thing the reviewer actually clicks. Four tabs.
 
@@ -323,7 +323,7 @@ print(r.for_tenant({'tenant_name':'Test','risk_score':82,'late_count_6m':3}))"
 
 ---
 
-### ⬜ Phase 7 — Tests and CI
+### ✅ Phase 7 — Tests and CI
 
 **Goal:** Evidence of engineering discipline. Most intern submissions have
 zero tests; this is cheap differentiation.
@@ -471,10 +471,22 @@ the reports; two of the three graded deliverables *are* documents.
 
 ## 6. Current state
 
+**7 of 10 phases complete** (0–7). The three ML layers and the dashboard are built and verified.
+
 ```
-8520248  feat(features): tenant risk feature pipeline with temporal split
-5c5a23d  feat(data): synthetic tenant roster and payment ledger generator
-4e827ee  chore: initialize TenantEase AI Intelligence Engine project
+daa12d8  feat(app): four-tab Streamlit intelligence dashboard        ← Phase 6
+9461f12  feat(llm): provider-agnostic smart recommendation engine    ← Phase 5
+8642c38  feat(forecast): Prophet revenue forecasting with backtest   ← Phase 4
+012574f  Delete LICENSE
+bbc71b5  feat(model): XGBoost tenant default-risk classifier         ← Phase 3
+00a325d  feat(features): tenant risk feature pipeline with temporal split  ← Phase 2
+fff5fd9  feat(data): synthetic tenant roster and payment ledger generator  ← Phase 1
+31a2ae4  chore: initialize TenantEase AI Intelligence Engine project ← Phase 0
 ```
 
-Working tree clean. Local only — no remote yet. **Next: Phase 3.**
+Pushed to GitHub. **Next: Phase 8 — AI Opportunity Report.**
+
+Verified so far: data generator (collection 94.5%), risk model (test AUC 0.893,
+CV 0.866, oracle ceiling 0.918), Prophet forecast (MAPE 1.36%) with Holt-Winters
+fallback, LLM engine (live + rule-based fallback), dashboard (AppTest: 0 errors,
+4 tabs, 7 charts).
