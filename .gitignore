@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Environment
+.env
+
+# Generated artifacts
+data/*.csv
+data/*.parquet
+models/*.json
+models/*.joblib
+!data/.gitkeep
+!models/.gitkeep
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+.ipynb_checkpoints/
