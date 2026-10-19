@@ -48,22 +48,28 @@ A four-tab Streamlit app ties the layers together.
 
 ## Quick start
 
+**One command** — creates the venv, installs dependencies, and launches the app.
+Synthetic data and the risk model are generated automatically on first run.
+
 ```bash
-# 1. install
+./run.sh
+```
+
+<details>
+<summary>Manual steps (equivalent)</summary>
+
+```bash
 python3.11 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-
-# 2. generate data + train the risk model
-.venv/bin/python scripts/generate_data.py
-.venv/bin/python scripts/train.py
-
-# 3. run the dashboard
-.venv/bin/streamlit run app.py
+.venv/bin/streamlit run app.py          # data + model auto-generate on first run
 ```
+</details>
 
 The app runs with **no API key** — the recommendation engine falls back to a
 deterministic rule-based generator. To enable live LLM recommendations, copy
-`.env.example` to `.env` and set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`.
+`.env.example` to `.env` and set `GEMINI_API_KEY` (or `ANTHROPIC_API_KEY` /
+`OPENAI_API_KEY`). Use the **Appearance** toggle in the sidebar to switch between
+light and dark themes.
 
 ---
 
@@ -125,7 +131,7 @@ cynbit-tenantease-ai/
 │   ├── forecasting.py          # Layer 2 — Prophet + Holt-Winters fallback
 │   ├── llm_client.py           # provider-agnostic LLM client
 │   ├── recommendations.py      # Layer 3 — recommendation engine
-│   └── ui.py                   # Plotly chart builders (dark theme)
+│   └── ui.py                   # Plotly chart builders (light/dark themes)
 ├── scripts/                    # generate_data · train · forecast · recommend · build_docs
 ├── tests/                      # 34 tests across all layers
 ├── docs/                       # AI Opportunity + Technical Approach reports (md + pdf)
@@ -152,5 +158,5 @@ before acting on scores. Details in the Technical Approach Report.
 
 ## Tech stack
 
-Python 3.11 · XGBoost · Prophet · scikit-learn · Anthropic / OpenAI SDKs ·
+Python 3.11 · XGBoost · Prophet · scikit-learn · Gemini / Anthropic / OpenAI ·
 Streamlit · Plotly · pandas · pytest

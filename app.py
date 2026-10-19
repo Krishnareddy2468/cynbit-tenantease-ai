@@ -13,15 +13,28 @@ public, so the app runs on a generated portfolio with realistic behaviour.
 
 from __future__ import annotations
 
+import os
+
 import streamlit as st
 
-from src import config, data_generator, features, forecasting, recommendations, risk_model, ui
-
+# set_page_config must be the very first Streamlit command.
 st.set_page_config(
     page_title="TenantEase AI Intelligence Engine",
     page_icon=":material/apartment:",
     layout="wide",
 )
+
+# On Streamlit Community Cloud, API keys are set as Secrets (not a .env file).
+# Bridge them into the environment so the provider-agnostic LLMClient — which
+# reads os.getenv — finds them exactly as it does locally. Harmless locally
+# (st.secrets is empty) and runs before the LLM client is constructed.
+try:
+    for _k, _v in st.secrets.items():
+        os.environ.setdefault(_k, str(_v))
+except Exception:
+    pass
+
+from src import config, data_generator, features, forecasting, recommendations, risk_model, ui  # noqa: E402
 
 
 # Chrome tokens per theme. `set_theme()` in src/ui.py handles the chart palette;
